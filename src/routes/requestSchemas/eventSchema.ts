@@ -6,7 +6,9 @@ export const eventSchema = [
         .withMessage("name cant be empty"),
     body('type')
         .exists({checkFalsy: true})
-        .withMessage("type cant be empty"),
+        .withMessage("type cant be empty")
+        .isIn(['track', 'identify', 'alias', 'screen', 'page'])
+        .withMessage("type must be one of track, identify, alias, screen, page"),
     body('description')
         .exists({checkFalsy: true})
         .withMessage("type cant be empty"),    
