@@ -30,10 +30,12 @@ describe('getAllEvents function', () => {
 
     it('should return empty array if no events exist', async () => {
         // Mock the query function to return empty result
+        //@ts-ignore
         const mockRows = [];
         
         // @ts-ignore
         db.query.mockImplementation((text, params) => {
+            //@ts-ignore
             return { rows: mockRows };
         });
 
