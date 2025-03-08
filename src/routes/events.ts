@@ -21,4 +21,9 @@ router.put("/:id", eventSchema, validateRequestSchema, asyncHandler (async (req:
     return res.json(event);
 }));
 
+router.delete("/:id", asyncHandler (async (req: Request, res: Response, next: NextFunction) => {
+    const event = await eventsController.deleteEvent(parseInt(req.params.id));
+    return res.json(event);
+}));
+
 export { router as eventsRouter };

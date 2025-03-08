@@ -13,9 +13,17 @@ const createEvent = async (event: event_create) => {
 const updateEvent = async (id: number, event: event_create) => {
     const findEvent = await eventsService.getEventById(id);
     if (!findEvent) {
-        return new ResourceNotFoundError('event');
+        throw new ResourceNotFoundError('event');
     }
     return await eventsService.updateEvent(id, event);
 }
 
-export {getAllEvents, createEvent, updateEvent};
+const deleteEvent = async (id: number) => {
+    const findEvent = await eventsService.getEventById(id);
+    if (!findEvent) {
+        throw new ResourceNotFoundError('event');
+    }
+    return await eventsService.deleteEvent(id);
+}
+
+export {getAllEvents, createEvent, updateEvent, deleteEvent};

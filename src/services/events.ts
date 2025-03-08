@@ -24,4 +24,10 @@ const updateEvent = async (id: number, event: event_create) => {
     const events = await db.query(`UPDATE events SET name = $1, type = $2, description = $3 WHERE id = $4`, [event.name, event.type, event.description, id]);
     return events.rows[0];
 }
-export {getAllEvents, createEvent, getEventById, updateEvent};
+
+const deleteEvent = async (id: number) => {
+    const events = await db.query(`DELETE FROM events WHERE id = $1`, [id]);
+    return events.rows[0];
+}
+
+export {getAllEvents, createEvent, getEventById, updateEvent, deleteEvent};
