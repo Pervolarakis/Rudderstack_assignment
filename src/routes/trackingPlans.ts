@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import * as trackingPlansController from "../controllers/trackingPlans";
 import { asyncHandler } from "../middlewares/asyncHandler";
-import { propertiesSchema } from "./requestSchemas/propertiesSchema";
+import { trackingPlanSchema } from "./requestSchemas/trackingPlanSchema";
 import { validateRequestSchema } from "../middlewares/validateRequestSchema";
 
 const router = Router();
@@ -11,12 +11,12 @@ router.get("/", asyncHandler (async (req: Request, res: Response, next: NextFunc
     return res.json(properties);
 }));
 
-router.post("/", asyncHandler (async (req: Request, res: Response, next: NextFunction) => {
+router.post("/", trackingPlanSchema, validateRequestSchema, asyncHandler (async (req: Request, res: Response, next: NextFunction) => {
     const trackingPlan = await trackingPlansController.createTrackingPlan(req.body);
     return res.json(trackingPlan);
 }));
 
-router.put("/:id", asyncHandler (async (req: Request, res: Response, next: NextFunction) => {
+router.put("/:id", trackingPlanSchema, validateRequestSchema, asyncHandler (async (req: Request, res: Response, next: NextFunction) => {
     const property = await trackingPlansController.updateTrackingPlan(parseInt(req.params.id), req.body);
     return res.json(property);
 }));

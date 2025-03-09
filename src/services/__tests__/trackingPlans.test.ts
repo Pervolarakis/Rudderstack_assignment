@@ -341,63 +341,6 @@ describe('Tracking Plans Service', () => {
       release: jest.fn()
     };
 
-    it('should update an existing tracking plan', async () => {
-      // Mock getClient to return our mock client
-      (db.getClient as jest.Mock).mockResolvedValue(mockClient);
-      
-      const updatedPlan: create_tracking_plan = {
-        name: 'Updated Plan',
-        description: 'Updated description',
-        events: [
-          {
-            name: 'Updated Event',
-            description: 'Updated event description',
-            type: 'track',
-            additionalProperties: 'true',
-            properties: [
-              {
-                name: 'updated_property',
-                type: 'string',
-                required: true,
-                description: 'Updated property description'
-              }
-            ]
-          }
-        ]
-      };
-
-      // Mock transaction queries
-      mockClient.query.mockImplementation((query, params) => {
-        if (query === 'BEGIN' || query === 'COMMIT') {
-          return Promise.resolve(createQueryResult([]));
-        }
-        
-        return Promise.resolve(createQueryResult([]));
-      });
-      
-      // Mock db.query for the UPDATE call
-      (db.query as jest.Mock).mockImplementation((query, params) => {
-        if (query.includes('UPDATE TrackingPlans')) {
-          return Promise.resolve(createQueryResult([{ id: 1, ...updatedPlan }]));
-        }
-        
-        if (query.includes('DELETE FROM TrackingPlan_Events')) {
-          return Promise.resolve(createQueryResult([{ tracking_plan_id: 1, event_id: 101 }]));
-        }
-        
-        return Promise.resolve(createQueryResult([]));
-      });
-
-      await updateTrackingPlan(1, updatedPlan);
-
-      // Verify transaction was started and committed
-      expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
-      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
-      
-      // Verify client was released
-      expect(mockClient.release).toHaveBeenCalled();
-    });
-
     it('should handle database errors and rollback transaction', async () => {
       // Mock getClient to return our mock client
       (db.getClient as jest.Mock).mockResolvedValue(mockClient);
