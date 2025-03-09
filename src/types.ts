@@ -29,3 +29,25 @@ export interface property_create {
     description: string
     validation_rules?: JSON,
 }
+
+export interface tracking_property {
+    name: string,
+    type: String,
+    required: boolean,
+    description: string,
+    validation_rules?: JSON,
+}
+
+export interface event_with_properties {
+    name: string,
+    description: string,
+    type: string,
+    properties: Array<tracking_property>,
+    additionalProperties: string
+}
+
+export interface create_tracking_plan {
+    name: string,
+    description: string,
+    events: Array<event_with_properties>,
+}

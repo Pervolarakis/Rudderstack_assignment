@@ -18,6 +18,6 @@ export const query = async (text: string, params: any) => {
 }
 
 export const getClient = async () => {
-    const client = await pool.connect()
+    const client = await pool.connect();
     return client
 }
