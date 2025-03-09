@@ -16,10 +16,10 @@ router.post("/", asyncHandler (async (req: Request, res: Response, next: NextFun
     return res.json(trackingPlan);
 }));
 
-// router.put("/:id", propertiesSchema, validateRequestSchema, asyncHandler (async (req: Request, res: Response, next: NextFunction) => {
-//     const property = await trackingPlansController.updateProperty(parseInt(req.params.id), req.body);
-//     return res.json(property);
-// }));
+router.put("/:id", asyncHandler (async (req: Request, res: Response, next: NextFunction) => {
+    const property = await trackingPlansController.updateTrackingPlan(parseInt(req.params.id), req.body);
+    return res.json(property);
+}));
 
 router.delete("/:id", asyncHandler (async (req: Request, res: Response, next: NextFunction) => {
     const trackingPlan = await trackingPlansController.deleteTrackingPlans(parseInt(req.params.id));

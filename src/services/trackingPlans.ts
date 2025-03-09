@@ -1,6 +1,6 @@
 import * as db from '../db/index'
 import { AllreadyExistsError } from '../errors/AlreadyExistsError';
-import { create_tracking_plan, event_with_properties, tracking_property } from '../types';
+import { create_tracking_plan, event_with_properties, get_tracking_plan, tracking_property } from '../types';
 
 const getAllTrackingPlans = async () => {
     const trackingPlansResult = await db.query('SELECT id, name, description FROM TrackingPlans', null);
@@ -9,7 +9,8 @@ const getAllTrackingPlans = async () => {
     const result = [];
 
     for (const trackingPlan of trackingPlans) {
-      const planData: create_tracking_plan = {
+      const planData: get_tracking_plan = {
+        id: trackingPlan.id,
         name: trackingPlan.name,
         description: trackingPlan.description,
         events: [],
@@ -62,93 +63,154 @@ const getAllTrackingPlans = async () => {
 }
 
 const createTrackingPlan = async (trackingPlan: create_tracking_plan) => {
-    const client = await db.getClient();
-    try {
-        await client.query('BEGIN');
-        
-        const trackingPlanResult = await client.query(
-            'INSERT INTO TrackingPlans (name, description) VALUES ($1, $2) ON CONFLICT (name) DO NOTHING RETURNING id',
-            [trackingPlan.name, trackingPlan.description]
+  const client = await db.getClient();
+  try {
+      await client.query('BEGIN');
+      
+      const trackingPlanResult = await client.query(
+          'INSERT INTO TrackingPlans (name, description) VALUES ($1, $2) ON CONFLICT (name) DO NOTHING RETURNING id',
+          [trackingPlan.name, trackingPlan.description]
+        );
+      
+      let trackingPlanId;
+      if (trackingPlanResult.rows.length > 0) {
+          trackingPlanId = trackingPlanResult.rows[0].id;
+      } else {
+          throw new AllreadyExistsError('Tracking plan');
+      }
+
+      for (const event of trackingPlan.events) {
+          const eventResult = await client.query(
+              'INSERT INTO Events (name, type, description) VALUES ($1, $2, $3) ON CONFLICT (name, type) DO NOTHING RETURNING id',
+              [event.name, event.type, event.description]
           );
-        
-        let trackingPlanId;
-        if (trackingPlanResult.rows.length > 0) {
-            trackingPlanId = trackingPlanResult.rows[0].id;
-        } else {
-            throw new AllreadyExistsError('Tracking plan');
-        }
-
-        for (const event of trackingPlan.events) {
-            const eventResult = await client.query(
-                'INSERT INTO Events (name, type, description) VALUES ($1, $2, $3) ON CONFLICT (name, type) DO NOTHING RETURNING id',
-                [event.name, event.type, event.description]
-            );
-        
-            // Get the event ID, whether it was inserted or already existed
-            let eventId;
-            if (eventResult.rows.length > 0) {
-                eventId = eventResult.rows[0].id;
-            } else {
-                const existingEventResult = await client.query(
-                    'SELECT id FROM Events WHERE name = $1 AND type = $2',
-                    [event.name, event.type]
-                );
-                eventId = existingEventResult.rows[0].id;
-            }
-
-            
-            for (const property of event.properties) {
-                const propertyResult = await client.query(
-                  'INSERT INTO Properties (name, type, description, validation_rules) VALUES ($1, $2, $3, $4) ON CONFLICT (name, type) DO NOTHING RETURNING id',
-                  [property.name, property.type, property.description, property.validation_rules] // Assuming no validation rules for simplicity
-                );
-        
-                // Get the property ID, whether it was inserted or already existed
-                let propertyId;
-                if (propertyResult.rows.length > 0) {
-                  propertyId = propertyResult.rows[0].id;
-                } else {
-                  const existingPropertyResult = await client.query(
-                    'SELECT id FROM Properties WHERE name = $1 AND type = $2',
-                    [property.name, property.type]
-                  );
-                  propertyId = existingPropertyResult.rows[0].id;
-                }
-        
-                await client.query(
-                    'INSERT INTO Event_Properties (event_id, property_id, required) VALUES ($1, $2, $3) ON CONFLICT (event_id, property_id) DO NOTHING',
-                    [eventId, propertyId, property.required]
-                );
-            }
-            await client.query(
-                'INSERT INTO TrackingPlan_Events (tracking_plan_id, event_id, additional_properties_allowed) VALUES ($1, $2, $3) ON CONFLICT (tracking_plan_id, event_id) DO NOTHING',
-                [trackingPlanId, eventId, event.additionalProperties === 'true']
+      
+          // Get the event ID, whether it was inserted or already existed
+          let eventId;
+          if (eventResult.rows.length > 0) {
+              eventId = eventResult.rows[0].id;
+          } else {
+              const existingEventResult = await client.query(
+                  'SELECT id FROM Events WHERE name = $1 AND type = $2',
+                  [event.name, event.type]
               );
-        }
-        await client.query('COMMIT');
-        
-    } catch (error) {
-        await client.query('ROLLBACK');
-        throw error;
-    }
-    finally{
-        await client.release();
-    }
+              eventId = existingEventResult.rows[0].id;
+          }
+
+          
+          for (const property of event.properties) {
+              const propertyResult = await client.query(
+                'INSERT INTO Properties (name, type, description, validation_rules) VALUES ($1, $2, $3, $4) ON CONFLICT (name, type) DO NOTHING RETURNING id',
+                [property.name, property.type, property.description, property.validation_rules] // Assuming no validation rules for simplicity
+              );
+      
+              // Get the property ID, whether it was inserted or already existed
+              let propertyId;
+              if (propertyResult.rows.length > 0) {
+                propertyId = propertyResult.rows[0].id;
+              } else {
+                const existingPropertyResult = await client.query(
+                  'SELECT id FROM Properties WHERE name = $1 AND type = $2',
+                  [property.name, property.type]
+                );
+                propertyId = existingPropertyResult.rows[0].id;
+              }
+      
+              await client.query(
+                  'INSERT INTO Event_Properties (event_id, property_id, required) VALUES ($1, $2, $3) ON CONFLICT (event_id, property_id) DO NOTHING',
+                  [eventId, propertyId, property.required]
+              );
+          }
+          await client.query(
+              'INSERT INTO TrackingPlan_Events (tracking_plan_id, event_id, additional_properties_allowed) VALUES ($1, $2, $3) ON CONFLICT (tracking_plan_id, event_id) DO NOTHING',
+              [trackingPlanId, eventId, event.additionalProperties === 'true']
+            );
+      }
+      await client.query('COMMIT');
+      
+  } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+  }
+  finally{
+      await client.release();
+  }
 }
 
-const getTrackingPlansById = async (id: number) => {
-    const trackingPlan = await db.query(`SELECT * FROM TrackingPlans WHERE id = $1`, [id]);
-    return trackingPlan.rows[0];
+const getTrackingPlanById = async (id: number) => {
+  const trackingPlan = await db.query(`SELECT * FROM TrackingPlans WHERE id = $1`, [id]);
+  return trackingPlan.rows[0];
 }
 
-// const updateTrackingPlans = async (id: number, trackingPlan: create_tracking_plan) => {
-//     const trackingPlans = await db.query(`UPDATE TrackingPlans SET name = $1, type = $2, description = $3, validation_rules = $4 WHERE id = $5 RETURNING *`, [trackingPlan.name, trackingPlan.type, trackingPlan.description, trackingPlan.validation_rules, id]);
-//     return trackingPlans.rows[0];
-// }
+const updateTrackingPlan = async (id: number, trackingPlan: create_tracking_plan) => {
+  const client = await db.getClient();
+  try {
+      await client.query('BEGIN');
+      let trackingPlanId = id;
+      await db.query(`UPDATE TrackingPlans SET name = $1, description = $2 WHERE id = $3 RETURNING *`, [trackingPlan.name, trackingPlan.description, id]);
+      const trackingPlanEvents = await db.query(`DELETE FROM TrackingPlan_Events WHERE tracking_plan_id = $1 RETURNING *`, [trackingPlanId]);
+      
+      for (const event of trackingPlan.events) {
+          const eventResult = await client.query(
+              'INSERT INTO Events (name, type, description) VALUES ($1, $2, $3) ON CONFLICT (name, type) DO NOTHING RETURNING id',
+              [event.name, event.type, event.description]
+          );
+      
+          // Get the event ID, whether it was inserted or already existed
+          let eventId;
+          if (eventResult.rows.length > 0) {
+              eventId = eventResult.rows[0].id;
+          } else {
+              const existingEventResult = await client.query(
+                  'SELECT id FROM Events WHERE name = $1 AND type = $2',
+                  [event.name, event.type]
+              );
+              eventId = existingEventResult.rows[0].id;
+          }
+
+          
+          for (const property of event.properties) {
+              const propertyResult = await client.query(
+                'INSERT INTO Properties (name, type, description, validation_rules) VALUES ($1, $2, $3, $4) ON CONFLICT (name, type) DO NOTHING RETURNING id',
+                [property.name, property.type, property.description, property.validation_rules] // Assuming no validation rules for simplicity
+              );
+      
+              // Get the property ID, whether it was inserted or already existed
+              let propertyId;
+              if (propertyResult.rows.length > 0) {
+                propertyId = propertyResult.rows[0].id;
+              } else {
+                const existingPropertyResult = await client.query(
+                  'SELECT id FROM Properties WHERE name = $1 AND type = $2',
+                  [property.name, property.type]
+                );
+                propertyId = existingPropertyResult.rows[0].id;
+              }
+      
+              await client.query(
+                  'INSERT INTO Event_Properties (event_id, property_id, required) VALUES ($1, $2, $3) ON CONFLICT (event_id, property_id) DO NOTHING',
+                  [eventId, propertyId, property.required]
+              );
+          }
+          await client.query(
+              'INSERT INTO TrackingPlan_Events (tracking_plan_id, event_id, additional_properties_allowed) VALUES ($1, $2, $3) ON CONFLICT (tracking_plan_id, event_id) DO NOTHING',
+              [trackingPlanId, eventId, event.additionalProperties === 'true']
+            );
+      }
+      await client.query('COMMIT');
+      
+  } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+  }
+  finally{
+      await client.release();
+  }
+}
 
 const deleteTrackingPlans = async (id: number) => {
     const trackingPlans = await db.query(`DELETE FROM TrackingPlans WHERE id = $1 RETURNING *`, [id]);
     return trackingPlans.rows[0];
 }
 
-export {getAllTrackingPlans, createTrackingPlan, getTrackingPlansById, deleteTrackingPlans};
+export {getAllTrackingPlans, createTrackingPlan, getTrackingPlanById, deleteTrackingPlans, updateTrackingPlan};

@@ -51,3 +51,10 @@ export interface create_tracking_plan {
     description: string,
     events: Array<event_with_properties>,
 }
+
+export interface get_tracking_plan {
+    id: number,
+    name: string,
+    description: string,
+    events: Array<event_with_properties>,
+}

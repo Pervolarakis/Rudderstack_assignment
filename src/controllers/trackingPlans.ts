@@ -10,20 +10,20 @@ const createTrackingPlan = async (trackingPlan: create_tracking_plan) => {
     return await trackingPlansService.createTrackingPlan(trackingPlan);
 }
 
-// const updateTrackingPlan = async (id: number, property: create_tracking_plan) => {
-//     const findProperty = await trackingPlansService.getTrackingPlansById(id);
-//     if (!findProperty) {
-//         throw new ResourceNotFoundError('property');
-//     }
-//     return await trackingPlansService.updateTrackingPlan(id, property);
-// }
+const updateTrackingPlan = async (id: number, trackingPlan: create_tracking_plan) => {
+    const findTrackingPlan = await trackingPlansService.getTrackingPlanById(id);
+    if (!findTrackingPlan) {
+        throw new ResourceNotFoundError('Tracking plan');
+    }
+    return await trackingPlansService.updateTrackingPlan(id, trackingPlan);
+}
 
 const deleteTrackingPlans = async (id: number) => {
-    const findTrackingPlan = await trackingPlansService.getTrackingPlansById(id);
+    const findTrackingPlan = await trackingPlansService.getTrackingPlanById(id);
     if (!findTrackingPlan) {
-        throw new ResourceNotFoundError('property');
+        throw new ResourceNotFoundError('Tracking plan');
     }
     return await trackingPlansService.deleteTrackingPlans(id);
 }
 
-export {getAllTrackingPlans, createTrackingPlan, deleteTrackingPlans};
+export {getAllTrackingPlans, createTrackingPlan, updateTrackingPlan, deleteTrackingPlans};
