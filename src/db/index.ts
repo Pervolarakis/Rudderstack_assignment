@@ -1,5 +1,14 @@
 import { Pool } from 'pg';
  
+const defaultDbConfig = {
+    user: 'youruser',
+    host: 'localhost',
+    database: 'yourtestdatabase',
+    password: 'yourpassword',
+    port: 5432,
+};
+  
+  // Test configuration
 const testDbConfig = {
     user: 'youruser',
     host: 'localhost',
@@ -8,7 +17,10 @@ const testDbConfig = {
     port: 5432,
 };
 
-const pool = new Pool(testDbConfig)
+const isTestEnvironment = process.env.NODE_ENV === 'test';
+const dbConfig = isTestEnvironment ? testDbConfig : defaultDbConfig;
+
+const pool = new Pool(dbConfig)
 export const query = async (text: string, params: any) => {
     const start = Date.now()
     const res = await pool.query(text, params)
