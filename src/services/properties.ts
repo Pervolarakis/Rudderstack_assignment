@@ -8,8 +8,8 @@ const getAllProperties = async () => {
 
 const createProperty = async (property: property_create) => {
     try {
-        const properties = await db.query(`INSERT INTO properties (name, type, description, validation_rules) VALUES ($1, $2, $3, $4)`, [property.name, property.type, property.description, property.validation_rules]);
-        return properties.rows;
+        const properties = await db.query(`INSERT INTO properties (name, type, description, validation_rules) VALUES ($1, $2, $3, $4) RETURNING *`, [property.name, property.type, property.description, property.validation_rules]);
+        return properties.rows[0];
     } catch (error) {
         console.log(error)
     }
@@ -21,12 +21,12 @@ const getPropertyById = async (id: number) => {
 }
 
 const updateProperty = async (id: number, property: property_create) => {
-    const properties = await db.query(`UPDATE properties SET name = $1, type = $2, description = $3, validation_rules = $4 WHERE id = $5`, [property.name, property.type, property.description, property.validation_rules, id]);
+    const properties = await db.query(`UPDATE properties SET name = $1, type = $2, description = $3, validation_rules = $4 WHERE id = $5 RETURNING *`, [property.name, property.type, property.description, property.validation_rules, id]);
     return properties.rows[0];
 }
 
 const deleteProperty = async (id: number) => {
-    const properties = await db.query(`DELETE FROM properties WHERE id = $1`, [id]);
+    const properties = await db.query(`DELETE FROM properties WHERE id = $1 RETURNING *`, [id]);
     return properties.rows[0];
 }
 

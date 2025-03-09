@@ -8,8 +8,8 @@ const getAllEvents = async () => {
 
 const createEvent = async (event: event_create) => {
     try {
-        const events = await db.query(`INSERT INTO events (name, type, description) VALUES ($1, $2, $3)`, [event.name, event.type, event.description]);
-        return events.rows;
+        const events = await db.query(`INSERT INTO events (name, type, description) VALUES ($1, $2, $3) RETURNING *`, [event.name, event.type, event.description]);
+        return events.rows[0];
     } catch (error) {
         console.log(error)
     }
@@ -21,12 +21,12 @@ const getEventById = async (id: number) => {
 }
 
 const updateEvent = async (id: number, event: event_create) => {
-    const events = await db.query(`UPDATE events SET name = $1, type = $2, description = $3 WHERE id = $4`, [event.name, event.type, event.description, id]);
+    const events = await db.query(`UPDATE events SET name = $1, type = $2, description = $3 WHERE id = $4 RETURNING *`, [event.name, event.type, event.description, id]);
     return events.rows[0];
 }
 
 const deleteEvent = async (id: number) => {
-    const events = await db.query(`DELETE FROM events WHERE id = $1`, [id]);
+    const events = await db.query(`DELETE FROM events WHERE id = $1 RETURNING *`, [id]);
     return events.rows[0];
 }
 

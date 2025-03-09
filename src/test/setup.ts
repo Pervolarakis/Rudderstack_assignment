@@ -1,20 +1,20 @@
 import 'jest';
-// import { Pool } from 'pg';
+import { Pool } from 'pg';
 
-// const testDbConfig = {
-//     user: 'youruser',
-//     host: 'localhost',
-//     database: 'yourtestdatabase',
-//     password: 'yourpassword',
-//     port: 5432,
-//   };
+const testDbConfig = {
+    user: 'youruser',
+    host: 'localhost',
+    database: 'yourtestdatabaseaaa',
+    password: 'yourpassword',
+    port: 5432,
+  };
 
-// beforeAll(async()=>{
-//     const pool = new Pool(testDbConfig);
-//     console.log("test")
-//     await pool.query(`CREATE TABLE IF NOT EXISTS...`); // Example setup
-//     pool.end();
-// });
+beforeAll(async()=>{
+    const pool = new Pool(testDbConfig);
+    // console.log("test")
+    // await pool.query(`CREATE TABLE IF NOT EXISTS...`); // Example setup
+    // pool.end();
+});
 
 // afterAll(async () => {
 //     const pool = new Pool(testDbConfig);
