@@ -12,3 +12,28 @@ services:
       - "5432:5432"
     volumes:
       - ./db/:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: node-app
+    environment:
+      - DB_USER=youruser
+      - DB_HOST=postgres
+      - DB_NAME=yourtestdatabase
+      - DB_PASSWORD=yourpassword
+      - DB_PORT=5432
+      - PORT=8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
