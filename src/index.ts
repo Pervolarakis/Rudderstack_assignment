@@ -8,8 +8,8 @@ const start = async () =>{
     }catch(err){
         console.log(err)
     }
-    app.listen(4000, ()=>{
-        console.log("listening on port 4000");
+    app.listen(8080, ()=>{
+        console.log("listening on port 8080");
     })
 }
 

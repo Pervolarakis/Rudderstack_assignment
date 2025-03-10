@@ -127,7 +127,7 @@ const createTrackingPlan = async (trackingPlan: create_tracking_plan) => {
             );
       }
       await client.query('COMMIT');
-      
+      return {id: trackingPlanId};
   } catch (error) {
       await client.query('ROLLBACK');
       throw error;
@@ -147,7 +147,7 @@ const updateTrackingPlan = async (id: number, trackingPlan: create_tracking_plan
   try {
       await client.query('BEGIN');
       let trackingPlanId = id;
-      await db.query(`UPDATE TrackingPlans SET name = $1, description = $2 WHERE id = $3 RETURNING *`, [trackingPlan.name, trackingPlan.description, id]);
+      const trackingplan = await db.query(`UPDATE TrackingPlans SET name = $1, description = $2 WHERE id = $3 RETURNING *`, [trackingPlan.name, trackingPlan.description, id]);
       const trackingPlanEvents = await db.query(`DELETE FROM TrackingPlan_Events WHERE tracking_plan_id = $1 RETURNING *`, [trackingPlanId]);
       
       for (const event of trackingPlan.events) {
@@ -198,7 +198,7 @@ const updateTrackingPlan = async (id: number, trackingPlan: create_tracking_plan
             );
       }
       await client.query('COMMIT');
-      
+      return trackingplan.rows[0];
   } catch (error) {
       await client.query('ROLLBACK');
       throw error;
