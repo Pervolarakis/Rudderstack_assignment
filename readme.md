@@ -79,16 +79,23 @@ A TrackingPlan is a collection of events and their expected properties, serving 
    docker-compose up
    ```
 
+5. Run the app in dev environment (required db running --see step 3):
+   ```bash
+   npm run dev
+   ```
+
 ## API Endpoints
+
+#### APP RUNS ON PORT: 8080, DEV RUNS ON 8079
 
 ### Events
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET    | /events  | Retrieve all events |
-| POST   | /events  | Create a new event |
-| PUT    | /events/:id | Update an existing event |
-| DELETE | /events/:id | Delete an event |
+| GET    | /api/v1/events  | Retrieve all events |
+| POST   | /api/v1/events  | Create a new event |
+| PUT    | /api/v1/events/:id | Update an existing event |
+| DELETE | /api/v1/events/:id | Delete an event |
 
 #### Example Event Payload:
 ```json
@@ -103,10 +110,10 @@ A TrackingPlan is a collection of events and their expected properties, serving 
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET    | /properties | Retrieve all properties |
-| POST   | /properties | Create a new property |
-| PUT    | /properties/:id | Update an existing property |
-| DELETE | /properties/:id | Delete a property |
+| GET    | /api/v1/properties | Retrieve all properties |
+| POST   | /api/v1/properties | Create a new property |
+| PUT    | /api/v1/properties/:id | Update an existing property |
+| DELETE | /api/v1/properties/:id | Delete a property |
 
 #### Example Property Payload:
 ```json
@@ -121,10 +128,10 @@ A TrackingPlan is a collection of events and their expected properties, serving 
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET    | /tracking-plans | Retrieve all tracking plans |
-| POST   | /tracking-plans | Create a new tracking plan |
-| PUT    | /tracking-plans/:id | Update an existing tracking plan |
-| DELETE | /tracking-plans/:id | Delete a tracking plan |
+| GET    | /api/v1/tracking_plans | Retrieve all tracking plans |
+| POST   | /api/v1/tracking_plans | Create a new tracking plan |
+| PUT    | /api/v1/tracking_plans/:id | Update an existing tracking plan |
+| DELETE | /api/v1/tracking_plans/:id | Delete a tracking plan |
 
 #### Example Tracking Plan Payload:
 ```json
@@ -236,3 +243,7 @@ data-catalog-api/
 ```bash
 npm test
 ```
+
+## Future Work
+- **Improve Scalability**: Improve scalability by introducing concepts such as caching, DB sharding etc.
+- **Write more tests**: There can never be enough tests :D
