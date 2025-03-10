@@ -36,8 +36,8 @@ CREATE TABLE IF NOT EXISTS Event_Properties (
   property_id INTEGER NOT NULL,
   required BOOLEAN NOT NULL,
   PRIMARY KEY (event_id, property_id),
-  FOREIGN KEY (event_id) REFERENCES Events(id),
-  FOREIGN KEY (property_id) REFERENCES Properties(id)
+  FOREIGN KEY (event_id) REFERENCES Events(id) ON DELETE CASCADE,
+  FOREIGN KEY (property_id) REFERENCES Properties(id) ON DELETE CASCADE
 );
 
 -- Create TrackingPlan_Events Table (Bridge Table for Many-to-Many Relationship)
@@ -46,6 +46,6 @@ CREATE TABLE IF NOT EXISTS TrackingPlan_Events (
   event_id INTEGER NOT NULL,
   additional_properties_allowed BOOLEAN,
   PRIMARY KEY (tracking_plan_id, event_id),
-  FOREIGN KEY (tracking_plan_id) REFERENCES TrackingPlans(id),
-  FOREIGN KEY (event_id) REFERENCES Events(id)
+  FOREIGN KEY (tracking_plan_id) REFERENCES TrackingPlans(id) ON DELETE CASCADE,
+  FOREIGN KEY (event_id) REFERENCES Events(id) ON DELETE CASCADE
 );
